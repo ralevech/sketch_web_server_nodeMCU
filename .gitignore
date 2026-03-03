@@ -1,0 +1,7 @@
+# Секреты - НЕ ДОБАВЛЯТЬ НИКОГДА
+secrets.h
+secrets.h.*
+*.h
+!secrets.h-example
+SECRETS.H
+Secrets.h
