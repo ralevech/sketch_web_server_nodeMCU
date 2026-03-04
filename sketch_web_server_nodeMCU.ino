@@ -77,19 +77,24 @@ void setup() {
   //});
 
 
-// Универсальный обработчик для всех непойманных запросов
-server.onNotFound([](AsyncWebServerRequest *request) {
-  Serial.println("Запрос к: " + request->url());
+  // Универсальный обработчик для всех непойманных запросов
+  server.onNotFound([](AsyncWebServerRequest *request) {
+    Serial.println("Запрос к: " + request->url());
   
-  // Если запрошен корень - отдаем index.html
-  if (request->url() == "/") {
-    request->send(LittleFS, "/index.html", "text/html");
-  } 
-  // Если запрошен неизвестный путь
-  else {
-    request->send(404, "text/plain", "404: Страница не найдена");
-  }
-});
+    // Если запрошен корень - отдаем index.html
+    if (request->url() == "/") {
+      request->send(LittleFS, "/index.html", "text/html");
+    } 
+    // Если запрошен неизвестный путь
+    else {
+      request->send(404, "text/plain", "404: Страница не найдена");
+    }
+  });
+
+  // Маршрут для CSS файла
+  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/style.css", "text/css");
+  });
 
   // Управление пином D4
   server.on("/D4/on", HTTP_GET, [](AsyncWebServerRequest *request) {
