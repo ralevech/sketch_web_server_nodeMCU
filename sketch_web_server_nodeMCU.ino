@@ -96,6 +96,25 @@ void setup() {
     request->send(LittleFS, "/style.css", "text/css");
   });
 
+  // ===== МАРШРУТЫ ДЛЯ ДОПОЛНИТЕЛЬНЫХ СТРАНИЦ =====
+  server.on("/page1", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/page_1.html", "text/html");
+  });
+  
+  server.on("/page2", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/page_2.html", "text/html");
+  });
+  
+  server.on("/page3", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/page_3.html", "text/html");
+  });
+  
+  server.on("/page4", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(LittleFS, "/page_4.html", "text/html");
+  });
+  // ===== КОНЕЦ МАРШРУТОВ =====
+
+
   // Управление пином D4
   server.on("/D4/on", HTTP_GET, [](AsyncWebServerRequest *request) {
     digitalWrite(D4_PIN, !OUT_ON);   // включить "светодиод"

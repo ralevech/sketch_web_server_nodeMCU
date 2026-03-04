@@ -133,4 +133,33 @@
             color: #6c757d;
             font-size: 14px;
         }
-  
+        
+
+        /* Стили для навигационного меню */
+        .nav-menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .nav-link {
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #495057;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: #e9ecef;
+        }
+
+        .nav-link.active {
+            background: #667eea;
+            color: white;
+        }
