@@ -1,8 +1,5 @@
-#ifndef ROUTES_H
-#define ROUTES_H
-
-#include <ESPAsyncWebServer.h>
-#include <LittleFS.h>
+#pragma once 
+#include "Includes.h"
 
 // Объявляем, что эти переменные есть в основном файле
 extern AsyncWebServer server;
@@ -14,7 +11,13 @@ extern bool isState_D4;
 extern bool isState_D1;
 
 // Функция настройки маршрутов
-void setupRoutes() {
+void setupRoutes(AsyncWebServer &server, 
+                const int D4_PIN, 
+                const int D1_PIN, 
+                const bool OUT_OFF, 
+                const bool OUT_ON,
+                bool &isState_D4, 
+                bool &isState_D1) {
   
   // Универсальный обработчик
   server.onNotFound([](AsyncWebServerRequest *request) {
@@ -48,42 +51,40 @@ void setupRoutes() {
     request->send(LittleFS, "/page_4.html", "text/html");
   });
 
-  // Управление D4
-  server.on("/D4/on", HTTP_GET, [](AsyncWebServerRequest *request) {
+  // Управление D4 - ЗАХВАТЫВАЕМ ВСЕ НУЖНЫЕ ПЕРЕМЕННЫЕ
+  server.on("/D4/on", HTTP_GET, [D4_PIN, OUT_ON, &isState_D4](AsyncWebServerRequest *request) {
     digitalWrite(D4_PIN, !OUT_ON);
     isState_D4 = true;
     request->send(200, "text/plain", "D4 ON");
     Serial.println("D4 включен");
   });
   
-  server.on("/D4/off", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/D4/off", HTTP_GET, [D4_PIN, OUT_OFF, &isState_D4](AsyncWebServerRequest *request) {
     digitalWrite(D4_PIN, !OUT_OFF);
     isState_D4 = false;
     request->send(200, "text/plain", "D4 OFF");
     Serial.println("D4 выключен");
   });
   
-  // Управление D1
-  server.on("/D1/on", HTTP_GET, [](AsyncWebServerRequest *request) {
+  // Управление D1 - ЗАХВАТЫВАЕМ ВСЕ НУЖНЫЕ ПЕРЕМЕННЫЕ
+  server.on("/D1/on", HTTP_GET, [D1_PIN, OUT_ON, &isState_D1](AsyncWebServerRequest *request) {
     digitalWrite(D1_PIN, OUT_ON);
     isState_D1 = true;
     request->send(200, "text/plain", "D1 ON");
     Serial.println("D1 включен");
   });
   
-  server.on("/D1/off", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/D1/off", HTTP_GET, [D1_PIN, OUT_OFF, &isState_D1](AsyncWebServerRequest *request) {
     digitalWrite(D1_PIN, OUT_OFF);
     isState_D1 = false;
     request->send(200, "text/plain", "D1 OFF");
     Serial.println("D1 выключен");
   });
   
-  // Статус
-  server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
+  // Статус - ЗАХВАТЫВАЕМ СОСТОЯНИЯ
+  server.on("/status", HTTP_GET, [&isState_D4, &isState_D1](AsyncWebServerRequest *request) {
     String json = "{\"d4\":" + String(isState_D4 ? "true" : "false") + 
                   ",\"d1\":" + String(isState_D1 ? "true" : "false") + "}";
     request->send(200, "application/json", json);
   });
 }
-
-#endif
