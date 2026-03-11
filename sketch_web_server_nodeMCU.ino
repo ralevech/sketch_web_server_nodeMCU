@@ -7,9 +7,12 @@ void setup() {
     setupPins();        // Настройка пинов
     connectToWiFi();    // Подключение к WiFi
     initFS();           // Монтирование LittleFS
-    RunWebServer();     // Запуск веб-сервера
+    runWebServer();     // Запуск веб-сервера
+
+    Serial.print("Свободно RAM: ");
+    Serial.println(ESP.getFreeHeap());
 }
 
 void loop() {
-    // ESP8266
+    
 }

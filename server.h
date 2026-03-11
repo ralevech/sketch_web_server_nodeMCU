@@ -3,7 +3,7 @@
 
 AsyncWebServer server(80);
 
-void RunWebServer() {
+void runWebServer() {
     setupRoutes();
     server.begin();
     Serial.println("Server started");

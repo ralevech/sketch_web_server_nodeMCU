@@ -3,55 +3,51 @@
 const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;
 
-// void connectToWiFi() {
-//     WiFi.begin(ssid, password);
-//     while (WiFi.status() != WL_CONNECTED) {
-//         delay(500);
-//         Serial.print(".");
-//     }
-//     Serial.println("\nWiFi connected");
-//     Serial.print("IP: ");
-//     Serial.println(WiFi.localIP());
-// }
-
-
 void connectToWiFi() {
-    WiFi.mode(WIFI_AP_STA);
+    Serial.println("\n=== НАСТРОЙКА WiFi ===");
     
-    // Пытаемся подключиться к твоей сети
+    // Пытаемся подключиться к WiFi сети
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     
     Serial.print("Подключение к WiFi");
+    
     int attempts = 0;
-    while (WiFi.status() != WL_CONNECTED && attempts < 40) {
+    while (WiFi.status() != WL_CONNECTED && attempts < 20) { // 20 попыток * 500мс = 10 секунд
         delay(500);
         Serial.print(".");
         attempts++;
     }
+    
+    Serial.println();
 
     if (WiFi.status() == WL_CONNECTED) {
-        Serial.println("\n✅ WiFi подключен");
-        Serial.print("IP: ");
+        Serial.println("✅ WiFi подключен");
+        Serial.print("IP адрес: ");
         Serial.println(WiFi.localIP());
+        
     } else {
-        Serial.println("\n⚠️  Не удалось подключиться к wifi. Запускаем точку доступа...");
+        Serial.println("⚠️  Не удалось подключиться к WiFi");
+        Serial.println("🔄 Запуск точки доступа...");
+        
+        // Переключаемся в режим точки доступа
+        WiFi.disconnect(true);
+        delay(100);
+        WiFi.mode(WIFI_OFF);
+        delay(100);
+        WiFi.mode(WIFI_AP);
+        
+        // Настраиваем точку доступа
+        WiFi.softAP("ESP_AP", "12345678", 1, false);
+        delay(500);
+        
+        // Выводим информацию о точке доступа
+        Serial.println("✅ Точка доступа запущена");
+        Serial.println("📡 Имя сети: ESP_AP");
+        Serial.println("🔑 Пароль: 12345678");
+        Serial.print("🌐 IP адрес: ");
+        Serial.println(WiFi.softAPIP());
     }
-
-    // Настраиваем точку доступа принудительно и явно
-    Serial.println("Настройка точки доступа...");
-    // Явно указываем: SSID, пароль, канал (1 - самый безопасный), hidden = false
-    WiFi.softAP("ESP_AP", "12345678", 1, false);
     
-    // Даем точке доступа время на инициализацию
-    delay(500);
-    
-    Serial.print("Точка доступа IP: ");
-    Serial.println(WiFi.softAPIP());
-    
-    // Проверяем, запустилась ли она
-    if (WiFi.softAPgetStationNum() >= 0) {
-        Serial.println("✅ Точка доступа активна");
-    } else {
-        Serial.println("❌ Ошибка запуска точки доступа");
-    }
+    Serial.println("========================\n");
 }

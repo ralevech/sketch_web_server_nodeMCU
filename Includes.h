@@ -10,6 +10,6 @@
 #include "secrets.h"           // WiFi логин и пароль
 #include "wifi.h"              // Подключение к WiFi
 #include "filesystem.h"        // Файловая система LittleFS
-#include "routes.h"            // НАВИГАЦИЯ - ПЕРЕНЕСТИ СЮДА
-#include "server.h"            // Веб-сервер - ПОТОМ СЮДА
+#include "routes.h"            // Навигация
+#include "server.h"            // Веб-сервер
 #include "pin_config.h"        // Настройка пинов
