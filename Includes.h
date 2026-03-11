@@ -3,13 +3,13 @@
 // ============ БИБЛИОТЕКИ ============
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
+#include <ESPAsyncWebServer.h>
 
 // ============ МОИ ФАЙЛЫ =============
-#include "Messages.h"          // 1. Сообщения для монитора порта
-#include "routes.h"            // 5.Навигация по страницам
-#include "secrets.h"           // 2. WiFi логин и пароль
-#include "DiagnosticMonitor.h" // 3. Диагностика памяти
-#include "SetupManager.h"      // 4. Первоначальная настройка
-
+#include "secrets.h"           // WiFi логин и пароль
+#include "wifi.h"              // Подключение к WiFi
+#include "filesystem.h"        // Файловая система LittleFS
+#include "routes.h"            // НАВИГАЦИЯ - ПЕРЕНЕСТИ СЮДА
+#include "server.h"            // Веб-сервер - ПОТОМ СЮДА
+#include "pin_config.h"        // Настройка пинов
