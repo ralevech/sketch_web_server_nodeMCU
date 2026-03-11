@@ -11,68 +11,44 @@ const char* PAGE_4_PATH = "page_4.html";
 
 extern AsyncWebServer server;
 
+// Структура для маршрута
+struct Route {
+    const char* path;
+    const char* filePath;
+    const char* contentType;
+};
+
 void setupRoutes() {
-    // Обработчик для CSS файла
-    server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request) {
-        // защита
-        if(!LittleFS.exists(CSS_PATH)) {
-            Serial.println("❌ Файл не найден!");
-            request->send(404, "text/plain", "File not found");
-            return;
-        }
-        request->send(LittleFS, CSS_PATH, "text/css");
-    });
+    // Массив всех файловых маршрутов
+    Route fileRoutes[] = {
+        {"/style.css", CSS_PATH, "text/css"},
+        {"/", INDEX_PATH, "text/html"},
+        {"/page1", PAGE_1_PATH, "text/html"},
+        {"/page2", PAGE_2_PATH, "text/html"},
+        {"/page3", PAGE_3_PATH, "text/html"},
+        {"/page4", PAGE_4_PATH, "text/html"}
+    };
 
-    // Обработчик для корневого пути
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        // защита
-        if(!LittleFS.exists(INDEX_PATH)) {
-            Serial.println("❌ Файл не найден!");
-            request->send(404, "text/plain", "File not found");
-            return;
-        }
-        request->send(LittleFS, INDEX_PATH, "text/html");
-    });
+    // Создаем обработчики
+    for (const auto& route : fileRoutes) {
+        server.on(route.path, HTTP_GET, [route](AsyncWebServerRequest *request) {
+            Serial.printf("Запрос: %s -> %s\n", route.path, route.filePath);
+            
+            if(!LittleFS.exists(route.filePath)) {
+                Serial.printf("❌ Файл не найден: %s\n", route.filePath);
+                request->send(404, "text/plain", "File not found");
+                return;
+            }
+            
+            request->send(LittleFS, route.filePath, route.contentType);
+            Serial.printf("✅ Отправлен: %s\n", route.filePath);
+        });
+    }
 
-    // Страницы
-    server.on("/page1", HTTP_GET, [](AsyncWebServerRequest *request) {
-        // защита
-        if(!LittleFS.exists(PAGE_1_PATH)) {
-            Serial.println("❌ Файл не найден!");
-            request->send(404, "text/plain", "File not found");
-            return;
-        }
-        request->send(LittleFS, PAGE_1_PATH, "text/html");
-    });
-
-    server.on("/page2", HTTP_GET, [](AsyncWebServerRequest *request) {
-        // защита
-        if(!LittleFS.exists(PAGE_2_PATH)) {
-            Serial.println("❌ Файл не найден!");
-            request->send(404, "text/plain", "File not found");
-            return;
-        }
-        request->send(LittleFS, PAGE_2_PATH, "text/html");
-    });
-
-    server.on("/page3", HTTP_GET, [](AsyncWebServerRequest *request) {
-        // защита
-        if(!LittleFS.exists(PAGE_3_PATH)) {
-            Serial.println("❌ Файл не найден!");
-            request->send(404, "text/plain", "File not found");
-            return;
-        }
-        request->send(LittleFS, PAGE_3_PATH, "text/html");
-    });
-
-    server.on("/page4", HTTP_GET, [](AsyncWebServerRequest *request) {
-        // защита
-        if(!LittleFS.exists(PAGE_4_PATH)) {
-            Serial.println("❌ Файл не найден!");
-            request->send(404, "text/plain", "File not found");
-            return;
-        }
-        request->send(LittleFS, PAGE_4_PATH, "text/html");
+    // Обработчик для несуществующих маршрутов (404)
+    server.onNotFound([](AsyncWebServerRequest *request) {
+        Serial.println("404 - Страница не найдена: " + request->url());
+        request->send(404, "text/plain", "404: Страница не найдена");
     });
 
     // Управление D4 с защитой от дребезга
@@ -126,9 +102,4 @@ void setupRoutes() {
         request->send(200, "application/json", json);
     });
 
-    // Обработчик для несуществующих маршрутов (404)
-    server.onNotFound([](AsyncWebServerRequest *request) {
-        Serial.println("404 - Страница не найдена: " + request->url());
-        request->send(404, "text/plain", "404: Страница не найдена");
-    });
 }
