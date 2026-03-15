@@ -5,6 +5,7 @@
 #include <ESP8266WiFi.h>
 #include <LittleFS.h>
 #include <ESPAsyncWebServer.h>
+#include <ESP8266mDNS.h>
 
 // ============ МОИ ФАЙЛЫ =============
 #include "secrets.h"           // WiFi логин и пароль

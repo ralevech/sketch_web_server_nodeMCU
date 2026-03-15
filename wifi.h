@@ -41,6 +41,18 @@ void connectToWiFi() {
         WiFi.softAP("ESP_AP", "12345678", 1, false);
         delay(500);
         
+        // === запускаем mDNS ===
+        if (MDNS.begin("host")) {  // "esp8266" красивый адрес
+            Serial.println("✅ mDNS запущен");
+            Serial.println("🌐 Подключайся по адресу: http://host.local");
+            
+            // Добавляем информацию о сервисе (опционально)
+            MDNS.addService("http", "tcp", 80);
+        } else {
+            Serial.println("❌ Ошибка запуска mDNS");
+        }
+
+        
         // Выводим информацию о точке доступа
         Serial.println("✅ Точка доступа запущена");
         Serial.println("📡 Имя сети: ESP_AP");
