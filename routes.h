@@ -7,99 +7,102 @@ const char* INDEX_PATH = "index.html";
 const char* PAGE_1_PATH = "page_1.html";
 const char* PAGE_2_PATH = "page_2.html";
 const char* PAGE_3_PATH = "page_3.html";
-const char* PAGE_4_PATH = "page_4.html";
 
 extern AsyncWebServer server;
 
-// Структура для маршрута
+// Структура для файловых маршрутов
 struct Route {
     const char* path;
     const char* filePath;
     const char* contentType;
 };
 
+// Структура для пинов
+struct PinRoute {
+    const char* name;
+    int pin;
+    bool invert;  // true для D4 (LOW = вкл), false для остальных (HIGH = вкл)
+};
+
 void setupRoutes() {
-    // Массив всех файловых маршрутов
+    // ========== ФАЙЛОВЫЕ МАРШРУТЫ ==========
     Route fileRoutes[] = {
         {"/style.css", CSS_PATH, "text/css"},
         {"/", INDEX_PATH, "text/html"},
         {"/page1", PAGE_1_PATH, "text/html"},
         {"/page2", PAGE_2_PATH, "text/html"},
-        {"/page3", PAGE_3_PATH, "text/html"},
-        {"/page4", PAGE_4_PATH, "text/html"}
+        {"/page3", PAGE_3_PATH, "text/html"}
     };
 
-    // Создаем обработчики
     for (const auto& route : fileRoutes) {
         server.on(route.path, HTTP_GET, [route](AsyncWebServerRequest *request) {
-            Serial.printf("Запрос: %s -> %s\n", route.path, route.filePath);
-            
             if(!LittleFS.exists(route.filePath)) {
-                Serial.printf("❌ Файл не найден: %s\n", route.filePath);
                 request->send(404, "text/plain", "File not found");
                 return;
             }
-            
             request->send(LittleFS, route.filePath, route.contentType);
-            Serial.printf("✅ Отправлен: %s\n", route.filePath);
         });
     }
 
-    // Обработчик для несуществующих маршрутов (404)
-    server.onNotFound([](AsyncWebServerRequest *request) {
-        Serial.println("404 - Страница не найдена: " + request->url());
-        request->send(404, "text/plain", "404: Страница не найдена");
-    });
+    // ========== МАРШРУТЫ ДЛЯ ПИНОВ ==========
+    PinRoute pins[] = {
+        {"D4", D4, true},   // D4: invert=true (LOW = вкл)
+        {"D1", D1, false},  // D1: invert=false (HIGH = вкл)
+        {"D2", D2, false},
+        {"D3", D3, false},
+        {"D5", D5, false},
+        {"D6", D6, false},
+        {"D7", D7, false},
+        {"D8", D8, false}
+    };
 
-    // Управление D4 с защитой от дребезга
-    server.on("/D4/on", HTTP_GET, [](AsyncWebServerRequest *request) {
-        static unsigned long lastD4On = 0;
-        if (millis() - lastD4On > 300) {
-            digitalWrite(D4, LOW);
-            Serial.println("D4 включен");
-            lastD4On = millis();
-        }
-        request->send(200, "text/plain", "D4 ON");
-    });
+    // Создаем обработчики для каждого пина
+    for (const auto& p : pins) {
+        // Включение
+        String onPath = String("/") + p.name + "/on";
+        server.on(onPath.c_str(), HTTP_GET, [p](AsyncWebServerRequest *request) {
+            static unsigned long lastTime = 0;
+            if (millis() - lastTime > 300) {
+                digitalWrite(p.pin, p.invert ? LOW : HIGH);
+                Serial.printf("%s включен\n", p.name);
+                lastTime = millis();
+            }
+            request->send(200, "text/plain", String(p.name) + " ON");
+        });
+        
+        // Выключение
+        String offPath = String("/") + p.name + "/off";
+        server.on(offPath.c_str(), HTTP_GET, [p](AsyncWebServerRequest *request) {
+            static unsigned long lastTime = 0;
+            if (millis() - lastTime > 300) {
+                digitalWrite(p.pin, p.invert ? HIGH : LOW);
+                Serial.printf("%s выключен\n", p.name);
+                lastTime = millis();
+            }
+            request->send(200, "text/plain", String(p.name) + " OFF");
+        });
+    }
 
-    server.on("/D4/off", HTTP_GET, [](AsyncWebServerRequest *request) {
-        static unsigned long lastD4Off = 0;
-        if (millis() - lastD4Off > 300) {
-            digitalWrite(D4, HIGH);
-            Serial.println("D4 выключен");
-            lastD4Off = millis();
-        }
-        request->send(200, "text/plain", "D4 OFF");
-    });
-
-    // Управление D1 с защитой от дребезга
-    server.on("/D1/on", HTTP_GET, [](AsyncWebServerRequest *request) {
-        static unsigned long lastD1On = 0;
-        if (millis() - lastD1On > 300) {
-            digitalWrite(D1, HIGH);
-            Serial.println("D1 включен");
-            lastD1On = millis();
-        }
-        request->send(200, "text/plain", "D1 ON");
-    });
-
-    server.on("/D1/off", HTTP_GET, [](AsyncWebServerRequest *request) {
-        static unsigned long lastD1Off = 0;
-        if (millis() - lastD1Off > 300) {
-            digitalWrite(D1, LOW);
-            Serial.println("D1 выключен");
-            lastD1Off = millis();
-        }
-        request->send(200, "text/plain", "D1 OFF");
-    });
-
-    // Статус
-    server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request) {
+    // ========== СТАТУС ==========
+    server.on("/status", HTTP_GET, [pins](AsyncWebServerRequest *request) {
         String json = "{";
-        json += "\"d4\":" + String(digitalRead(D4) == LOW ? "true" : "false") + ",";
-        json += "\"d1\":" + String(digitalRead(D1) == HIGH ? "true" : "false");
+        for (int i = 0; i < 8; i++) {
+            bool state;
+            if (pins[i].invert) {
+                state = (digitalRead(pins[i].pin) == LOW);  // D4
+            } else {
+                state = (digitalRead(pins[i].pin) == HIGH); // остальные
+            }
+            
+            json += "\"" + String(pins[i].name) + "\":" + (state ? "true" : "false");
+            if (i < 7) json += ",";
+        }
         json += "}";
         request->send(200, "application/json", json);
     });
 
+    // ========== 404 ==========
+    server.onNotFound([](AsyncWebServerRequest *request) {
+        request->send(404, "text/plain", "404: Not found");
+    });
 }
