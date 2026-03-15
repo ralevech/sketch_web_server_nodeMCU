@@ -1,5 +1,4 @@
 #pragma once
-#include "Includes.h"
 
 // Определяем пути к файлам
 const char* CSS_PATH = "style.css";
@@ -7,21 +6,20 @@ const char* INDEX_PATH = "index.html";
 const char* PAGE_1_PATH = "page_1.html";
 const char* PAGE_2_PATH = "page_2.html";
 const char* PAGE_3_PATH = "page_3.html";
+const char* PAGE_4_PATH = "page_4.html";
 
 extern AsyncWebServer server;
 
-// Структура для файловых маршрутов
 struct Route {
     const char* path;
     const char* filePath;
     const char* contentType;
 };
 
-// Структура для пинов
 struct PinRoute {
     const char* name;
     int pin;
-    bool invert;  // true для D4 (LOW = вкл), false для остальных (HIGH = вкл)
+    bool invert;
 };
 
 void setupRoutes() {
@@ -31,7 +29,8 @@ void setupRoutes() {
         {"/", INDEX_PATH, "text/html"},
         {"/page1", PAGE_1_PATH, "text/html"},
         {"/page2", PAGE_2_PATH, "text/html"},
-        {"/page3", PAGE_3_PATH, "text/html"}
+        {"/page3", PAGE_3_PATH, "text/html"},
+        {"/page4", PAGE_4_PATH, "text/html"}
     };
 
     for (const auto& route : fileRoutes) {
@@ -46,8 +45,8 @@ void setupRoutes() {
 
     // ========== МАРШРУТЫ ДЛЯ ПИНОВ ==========
     PinRoute pins[] = {
-        {"D4", D4, true},   // D4: invert=true (LOW = вкл)
-        {"D1", D1, false},  // D1: invert=false (HIGH = вкл)
+        {"D4", D4, true},
+        {"D1", D1, false},
         {"D2", D2, false},
         {"D3", D3, false},
         {"D5", D5, false},
@@ -56,9 +55,7 @@ void setupRoutes() {
         {"D8", D8, false}
     };
 
-    // Создаем обработчики для каждого пина
     for (const auto& p : pins) {
-        // Включение
         String onPath = String("/") + p.name + "/on";
         server.on(onPath.c_str(), HTTP_GET, [p](AsyncWebServerRequest *request) {
             static unsigned long lastTime = 0;
@@ -70,7 +67,6 @@ void setupRoutes() {
             request->send(200, "text/plain", String(p.name) + " ON");
         });
         
-        // Выключение
         String offPath = String("/") + p.name + "/off";
         server.on(offPath.c_str(), HTTP_GET, [p](AsyncWebServerRequest *request) {
             static unsigned long lastTime = 0;
@@ -87,12 +83,9 @@ void setupRoutes() {
     server.on("/status", HTTP_GET, [pins](AsyncWebServerRequest *request) {
         String json = "{";
         for (int i = 0; i < 8; i++) {
-            bool state;
-            if (pins[i].invert) {
-                state = (digitalRead(pins[i].pin) == LOW);  // D4
-            } else {
-                state = (digitalRead(pins[i].pin) == HIGH); // остальные
-            }
+            bool state = (pins[i].invert) 
+                ? (digitalRead(pins[i].pin) == LOW)
+                : (digitalRead(pins[i].pin) == HIGH);
             
             json += "\"" + String(pins[i].name) + "\":" + (state ? "true" : "false");
             if (i < 7) json += ",";
