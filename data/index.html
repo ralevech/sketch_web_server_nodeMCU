@@ -14,12 +14,11 @@
             <a href="/page1" class="nav-link">📄 Страница 1</a>
             <a href="/page2" class="nav-link">📄 Страница 2</a>
             <a href="/page3" class="nav-link">📄 Страница 3</a>
-            <a href="/page4" class="nav-link">📄 Страница 4</a>
         </div>
         
         <h1>🚀 Управление ESP8266</h1>
         
-        <!-- Группа для пина D4 -->
+        <!-- D4 -->
         <div class="pin-group">
             <h2>
                 <span class="pin-badge">D4</span>
@@ -27,26 +26,110 @@
                 <span style="margin-left: auto; font-size: 14px;">GPIO2</span>
             </h2>
             <div class="button-container">
-                <button class="btn btn-on" onclick="controlPin('D4', 'on')">ВКЛЮЧИТЬ</button>
-                <button class="btn btn-off" onclick="controlPin('D4', 'off')">ВЫКЛЮЧИТЬ</button>
+                <button class="btn btn-on" onclick="controlPin('D4', 'on')">ВКЛ</button>
+                <button class="btn btn-off" onclick="controlPin('D4', 'off')">ВЫКЛ</button>
             </div>
         </div>
         
-        <!-- Группа для пина D1 -->
+        <!-- D1 -->
         <div class="pin-group">
             <h2>
                 <span class="pin-badge">D1</span>
-                Внешнее устройство
+                Пин D1
                 <span style="margin-left: auto; font-size: 14px;">GPIO5</span>
             </h2>
             <div class="button-container">
-                <button class="btn btn-on" onclick="controlPin('D1', 'on')">ВКЛЮЧИТЬ</button>
-                <button class="btn btn-off" onclick="controlPin('D1', 'off')">ВЫКЛЮЧИТЬ</button>
+                <button class="btn btn-on" onclick="controlPin('D1', 'on')">ВКЛ</button>
+                <button class="btn btn-off" onclick="controlPin('D1', 'off')">ВЫКЛ</button>
             </div>
         </div>
         
+        <!-- D2 -->
+        <div class="pin-group">
+            <h2>
+                <span class="pin-badge">D2</span>
+                Пин D2
+                <span style="margin-left: auto; font-size: 14px;">GPIO4</span>
+            </h2>
+            <div class="button-container">
+                <button class="btn btn-on" onclick="controlPin('D2', 'on')">ВКЛ</button>
+                <button class="btn btn-off" onclick="controlPin('D2', 'off')">ВЫКЛ</button>
+            </div>
+        </div>
+        
+        <!-- D3 -->
+        <div class="pin-group">
+            <h2>
+                <span class="pin-badge">D3</span>
+                Пин D3
+                <span style="margin-left: auto; font-size: 14px;">GPIO0</span>
+            </h2>
+            <div class="button-container">
+                <button class="btn btn-on" onclick="controlPin('D3', 'on')">ВКЛ</button>
+                <button class="btn btn-off" onclick="controlPin('D3', 'off')">ВЫКЛ</button>
+            </div>
+        </div>
+        
+        <!-- D5 -->
+        <div class="pin-group">
+            <h2>
+                <span class="pin-badge">D5</span>
+                Пин D5
+                <span style="margin-left: auto; font-size: 14px;">GPIO14</span>
+            </h2>
+            <div class="button-container">
+                <button class="btn btn-on" onclick="controlPin('D5', 'on')">ВКЛ</button>
+                <button class="btn btn-off" onclick="controlPin('D5', 'off')">ВЫКЛ</button>
+            </div>
+        </div>
+        
+        <!-- D6 -->
+        <div class="pin-group">
+            <h2>
+                <span class="pin-badge">D6</span>
+                Пин D6
+                <span style="margin-left: auto; font-size: 14px;">GPIO12</span>
+            </h2>
+            <div class="button-container">
+                <button class="btn btn-on" onclick="controlPin('D6', 'on')">ВКЛ</button>
+                <button class="btn btn-off" onclick="controlPin('D6', 'off')">ВЫКЛ</button>
+            </div>
+        </div>
+        
+        <!-- D7 -->
+        <div class="pin-group">
+            <h2>
+                <span class="pin-badge">D7</span>
+                Пин D7
+                <span style="margin-left: auto; font-size: 14px;">GPIO13</span>
+            </h2>
+            <div class="button-container">
+                <button class="btn btn-on" onclick="controlPin('D7', 'on')">ВКЛ</button>
+                <button class="btn btn-off" onclick="controlPin('D7', 'off')">ВЫКЛ</button>
+            </div>
+        </div>
+        
+        <!-- D8 -->
+        <div class="pin-group">
+            <h2>
+                <span class="pin-badge">D8</span>
+                Пин D8
+                <span style="margin-left: auto; font-size: 14px;">GPIO15</span>
+            </h2>
+            <div class="button-container">
+                <button class="btn btn-on" onclick="controlPin('D8', 'on')">ВКЛ</button>
+                <button class="btn btn-off" onclick="controlPin('D8', 'off')">ВЫКЛ</button>
+            </div>
+        </div>
+        
+        <!-- Статус -->
         <div class="status" id="status">
             Статус: <span id="statusText">готов к работе</span>
+        </div>
+        
+        <!-- Кнопка обновления статуса -->
+        <div style="text-align: center; margin-top: 10px;">
+            <button class="btn" style="background: #17a2b8;" onclick="updateStatus()">🔄 Обновить статус</button>
         </div>
         
         <div class="footer">
@@ -57,12 +140,13 @@
     <script>
         function controlPin(pin, action) {
             const statusEl = document.getElementById('statusText');
-            statusEl.innerHTML = `отправка команды ${pin} ${action}...`;
+            statusEl.innerHTML = `⏳ отправка команды ${pin} ${action}...`;
             
             fetch(`/${pin}/${action}`)
                 .then(response => {
                     if (response.ok) {
                         statusEl.innerHTML = `✅ ${pin} ${action === 'on' ? 'включен' : 'выключен'}`;
+                        updateStatus(); // автоматически обновляем статус всех пинов
                         return response.text();
                     }
                     throw new Error('Ошибка сети');
@@ -72,6 +156,26 @@
                     console.error('Error:', error);
                 });
         }
+        
+        function updateStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    let statusText = '';
+                    for (let pin in data) {
+                        statusText += `${pin}: ${data[pin] ? 'ON' : 'OFF'} `;
+                    }
+                    document.getElementById('statusText').innerHTML = statusText;
+                })
+                .catch(error => {
+                    console.error('Status error:', error);
+                });
+        }
+        
+        // Автоматическое обновление статуса при загрузке
+        window.onload = function() {
+            updateStatus();
+        };
     </script>
 </body>
 </html>
