@@ -123,7 +123,7 @@ const char* ssid = "Имя_вашей_WiFi_сети";
 const char* password = "Пароль_от_WiFi";
 ```
 
-### 5. Структура проекта
+### Структура проекта
 
 ```
 sketch_web_server_nodeMCU/
