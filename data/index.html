@@ -1,75 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<meta charset='UTF-8'>
-<title>LED Control</title>
-<style>
-button { margin: 10px; padding: 15px 30px; font-size: 18px; }
-.led1 { background: #4CAF50; color: white; }
-.led2 { background: #2196F3; color: white; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ESP8266 LED Control</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
 </head>
 <body>
-
-<h1>Управление LED</h1>
-
-<div style='margin: 20px; padding: 10px; border: 1px solid #ccc;'>
-<h2>LED1 (встроенный)</h2>
-<button id='btn1' class='led1' onclick='toggleLED(1)'>ВКЛЮЧИТЬ LED1</button>
-<p>Статус LED1: <span id='status1'>OFF</span></p>
-</div>
-
-<div style='margin: 20px; padding: 10px; border: 1px solid #ccc;'>
-<h2>LED2 (внешний)</h2>
-<button id='btn2' class='led2' onclick='toggleLED(2)'>ВКЛЮЧИТЬ LED2</button>
-<p>Статус LED2: <span id='status2'>OFF</span></p>
-</div>
-
-<script>
-
-async function toggleLED(num) {
-    const response = await fetch('/toggle' + num);
-    const state = await response.text();
-    const btn = document.getElementById('btn' + num);
-    const span = document.getElementById('status' + num);
-    if(state === 'ON') {
-        btn.innerHTML = (num === 1 ? 'ВЫКЛЮЧИТЬ LED1' : 'ВЫКЛЮЧИТЬ LED2');
-        span.innerHTML = 'ON';
-    } else {
-        btn.innerHTML = (num === 1 ? 'ВКЛЮЧИТЬ LED1' : 'ВКЛЮЧИТЬ LED2');
-        span.innerHTML = 'OFF';
-    }
-}
-
-async function getStatus() {
-    const response1 = await fetch('/status1');
-    const state1 = await response1.text();
-    const btn1 = document.getElementById('btn1');
-    const span1 = document.getElementById('status1');
-    if(state1 === 'ON') {
-        btn1.innerHTML = 'ВЫКЛЮЧИТЬ LED1';
-        span1.innerHTML = 'ON';
-    } else {
-        btn1.innerHTML = 'ВКЛЮЧИТЬ LED1';
-        span1.innerHTML = 'OFF';
-    }
-
-    const response2 = await fetch('/status2');
-    const state2 = await response2.text();
-    const btn2 = document.getElementById('btn2');
-    const span2 = document.getElementById('status2');
-    if(state2 === 'ON') {
-        btn2.innerHTML = 'ВЫКЛЮЧИТЬ LED2';
-        span2.innerHTML = 'ON';
-    } else {
-        btn2.innerHTML = 'ВКЛЮЧИТЬ LED2';
-        span2.innerHTML = 'OFF';
-    }
-}
-
-getStatus();
-setInterval(getStatus, 2000);
-</script>
-
+    <div class="container">
+        <div class="card">
+            <h1>🎮 Управление LED</h1>
+            <p class="subtitle">ESP8266 веб-интерфейс</p>
+            
+            <div class="led-card led-1">
+                <div class="led-info">
+                    <span class="led-icon">💡</span>
+                    <h2>LED 1</h2>
+                    <p>Встроенный</p>
+                </div>
+                <div class="led-control">
+                    <button class="btn btn-toggle" data-led="1" id="btn1">Включить</button>
+                </div>
+                <div class="led-status">
+                    Статус: <span id="status1" class="status-text">OFF</span>
+                </div>
+            </div>
+            
+            <div class="led-card led-2">
+                <div class="led-info">
+                    <span class="led-icon">🔆</span>
+                    <h2>LED 2</h2>
+                    <p>Внешний (D1)</p>
+                </div>
+                <div class="led-control">
+                    <button class="btn btn-toggle" data-led="2" id="btn2">Включить</button>
+                </div>
+                <div class="led-status">
+                    Статус: <span id="status2" class="status-text">OFF</span>
+                </div>
+            </div>
+            
+            <div class="system-info">
+                <h3>📊 Системная информация</h3>
+                <p>IP адрес: <span id="ip">загрузка...</span></p>
+                <p>Время работы: <span id="uptime">0</span> сек</p>
+                <p>Свободная память: <span id="heap">0</span> байт</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="assets/js/main.js"></script>
 </body>
 </html>

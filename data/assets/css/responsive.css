@@ -1,0 +1,49 @@
+@media (max-width: 600px) {
+    .container {
+        padding: 0;
+    }
+    
+    .card {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 24px;
+    }
+    
+    .led-control {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn {
+        padding: 10px 16px;
+    }
+    
+    .led-info {
+        flex-wrap: wrap;
+    }
+    
+    .led-info p {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 400px) {
+    .card {
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 20px;
+    }
+    
+    .led-icon {
+        font-size: 24px;
+    }
+    
+    .led-info h2 {
+        font-size: 18px;
+    }
+}

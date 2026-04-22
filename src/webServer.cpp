@@ -3,8 +3,17 @@
 #include "ledControl.h"
 #include <ESP8266WebServer.h>
 #include <LittleFS.h>
+#include <ESP8266WiFi.h>
 
 ESP8266WebServer server(80);
+
+// Функция для определения MIME типа
+String getContentType(String filename) {
+  if (filename.endsWith(".css")) return "text/css";
+  if (filename.endsWith(".js")) return "application/javascript";
+  if (filename.endsWith(".html")) return "text/html";
+  return "text/plain";
+}
 
 void handleRoot() {
   File file = LittleFS.open("/index.html", "r");
@@ -31,6 +40,15 @@ void handleStatus1() {
 void handleToggle2() {
   toggleLED2();
   server.send(200, "text/plain", getLED2Status());
+}
+
+void handleSystem() {
+  String json = "{";
+  json += "\"ip\":\"" + WiFi.localIP().toString() + "\",";
+  json += "\"uptime\":" + String(millis() / 1000) + ",";
+  json += "\"heap\":" + String(ESP.getFreeHeap());
+  json += "}";
+  server.send(200, "application/json", json);
 }
 
 void handleStatus2() {
@@ -65,7 +83,20 @@ void startWebServer() {
     Serial.println("❌ index.html NOT found!");
   }
 
-
+  // ========== УНИВЕРСАЛЬНЫЙ ОБРАБОТЧИК ДЛЯ CSS/JS ==========
+  server.onNotFound([]() {
+    String path = server.uri();
+    
+    if (LittleFS.exists(path)) {
+      File file = LittleFS.open(path, "r");
+      String contentType = getContentType(path);
+      server.streamFile(file, contentType);
+      file.close();
+    } else {
+      server.send(404, "text/plain", "File not found: " + path);
+    }
+  });
+  // ========================================================
 
   // Основная страница
   server.on("/", handleRoot);
@@ -75,8 +106,12 @@ void startWebServer() {
   // LED2
   server.on("/toggle2", handleToggle2);
   server.on("/status2", handleStatus2);
+  //
+  server.on("/system", handleSystem);
+  
   // запускаем сервер
   server.begin();
+  // тех. информация в консоль
   Serial.println("HTTP server started");
   Serial.print("IP: ");
   Serial.println(WiFi.localIP());
